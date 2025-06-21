@@ -45,6 +45,7 @@ S3 (image storage)
 - **Secrets Manager** was integrated to securely handle database credentials and secret keys, keeping them out of source code and under centralized AWS-managed access controls.
 
 ## 📦 Future Enhancements
+
 Stripe or PayPal integration for payments
 
 Product filtering and search functionality

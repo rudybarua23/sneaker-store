@@ -46,15 +46,15 @@ S3 (image storage)
 
 ## 📦 Future Enhancements
 
-Stripe or PayPal integration for payments
+- Stripe or PayPal integration for payments
 
-Product filtering and search functionality
+- Product filtering and search functionality
 
-Order history and checkout process
+- Order history and checkout process
 
-User-generated reviews and ratings
+- User-generated reviews and ratings
 
-CI/CD deployment pipeline (GitHub Actions, AWS CodePipeline)
+- CI/CD deployment pipeline (GitHub Actions, AWS CodePipeline)
 
 ## 🔧 Setup Instructions
 

@@ -25,6 +25,14 @@ A full-stack e-commerce application for browsing and purchasing sneakers. Built 
 - **IAM Roles**: Securely grants Lambda and API Gateway controlled access to other AWS services (like S3 or Aurora)
 - **AWS Secrets Manager**: Manages database credentials and other sensitive secrets
 
+### 🌐 API Design
+
+This project uses a **RESTful API architecture** powered by **AWS API Gateway** and **AWS Lambda**.
+
+- Each route (e.g., `GET /api/products`, `POST /api/orders`) is defined in API Gateway and mapped to a corresponding Lambda function.
+- Lambda functions serve as stateless handlers that return JSON responses.
+- This setup offers the benefits of REST while remaining fully serverless and scalable.
+
 ## ☁️ AWS Architecture
 User ➝ (optional: CloudFront) ➝ S3 (frontend hosting)
 ⬇

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuth } from 'react-oidc-context';
 
 function SneakerForm({ setSneakers }) {
   // Local form state

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import SneakerList from './components/SneakerList';
-import SneakerForm from './components/SneakerForm';
+import SneakerList from './components/sneakerList';
+import SneakerForm from './components/sneakerForm';
 
 function App() {
   const [sneakers, setSneakers] = useState([]); // holds list of sneakers

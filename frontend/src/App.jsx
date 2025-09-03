@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import SneakerList from './components/sneakerList';
 import SneakerForm from './components/sneakerForm';
+import LoginComp from './components/LoginComp';
 
 function App() {
   const [sneakers, setSneakers] = useState([]); // holds list of sneakers
@@ -9,7 +10,7 @@ function App() {
   useEffect(() => {
     async function fetchSneakers() {
       try {
-        const res = await fetch('http://localhost:3001/api/products');
+        const res = await fetch(`${import.meta.env.VITE_API_BASE}/shoes`);
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json(); //parsed json into an array of sneakers
         setSneakers(data); // saves array to sneakers state
@@ -24,6 +25,9 @@ function App() {
 
   return (
     <div>
+      <div id = "loginPanel">
+        <LoginComp/>
+      </div>
       <h1>Sneaker Catalog</h1>
       <SneakerList
         sneakers={sneakers}
@@ -37,6 +41,7 @@ function App() {
         </>
       )}
     </div>
+
   );
 }
 

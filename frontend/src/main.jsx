@@ -2,7 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
-import { AuthProvider } from "react-oidc-context";
+import './amplify-config';
 
 const cognitoAuthConfig = {
   authority: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_8bMnXBmfA", // your user pool
@@ -14,8 +14,6 @@ const cognitoAuthConfig = {
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <AuthProvider {...cognitoAuthConfig}>
       <App />
-    </AuthProvider>
   </StrictMode>,
 )

@@ -18,6 +18,7 @@ export default function AdminPage() {
       try {
         // Get tokens from Amplify v6
         const { tokens } = await fetchAuthSession();
+        const accessToken = tokens?.accessToken?.toString(); 
         const idToken = tokens?.idToken?.toString();         // JWT string
         if (!idToken) throw new Error('No session');
         const decoded = JSON.parse(atob(idToken.split('.')[1])); // claims
@@ -25,6 +26,8 @@ export default function AdminPage() {
         setToken(idToken);
         setClaims(decoded);
         setLoading(false);
+        window.__ID_TOKEN__ = idToken;              // so you can copy it
+        console.log('ID_TOKEN for API GW test:', idToken);  // dev-only
       } catch (e) {
         // Not signed in → go to Hosted UI (includes "Sign up")
         setLoading(false);
@@ -79,8 +82,10 @@ export default function AdminPage() {
 
   async function deleteShoe(id) {
     setStatus('');
-    try {
-      const res = await fetch(`${API_BASE}/shoes/${id}`, {
+    try { 
+      console.log("access token: ", token)
+      const res = await fetch(`${API_BASE}/shoes/${id}`, 
+        {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });

@@ -3,7 +3,7 @@ function SneakerList({ sneakers, isAdmin, setSneakers, getToken }) {
 
   const handleDelete = async (id) => {
     try {
-      const token = getToken ? await getToken() : null; // e.g., from Cognito
+      const token = getToken//getToken ? await getToken() : null; // e.g., from Cognito
       const res = await fetch(`${API_BASE}/shoes/${id}`, {
         method: 'DELETE',
         headers: {

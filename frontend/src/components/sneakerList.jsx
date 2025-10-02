@@ -1,13 +1,13 @@
-function SneakerList({ sneakers, isAdmin, setSneakers, getToken }) {
+function SneakerList({ sneakers, isAdmin, setSneakers, token }) {
   const API_BASE = import.meta.env.VITE_API_BASE;
 
   const handleDelete = async (id) => {
     try {
-      const token = getToken//getToken ? await getToken() : null; // e.g., from Cognito
+      if (!token) throw new Error('No auth token yet');
       const res = await fetch(`${API_BASE}/shoes/${id}`, {
         method: 'DELETE',
         headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -30,7 +30,7 @@ function SneakerList({ sneakers, isAdmin, setSneakers, getToken }) {
           <h3>{s.name}</h3>
           <p>{s.brand} - ${s.price}</p>
           <img src={s.image} alt={s.name} width="150" />
-          {isAdmin && <button onClick={() => handleDelete(s.id)}>Delete</button>}
+          {isAdmin && <button onClick={() => handleDelete(s.id)} disabled={!token}>Delete</button>}
         </div>
       ))}
     </div>

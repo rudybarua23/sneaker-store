@@ -1,62 +1,43 @@
 // src/pages/AdminPage.jsx
 import { useEffect, useState } from 'react';
-import { signInWithRedirect, fetchAuthSession, signOut } from 'aws-amplify/auth';
-import SneakerForm from './components/SneakerForm'; // adjust path/case
+import { signOut } from 'aws-amplify/auth';
+import SneakerForm from '../components/sneakerForm'; // <-- adjust to your actual path/case
 const API_BASE = import.meta.env.VITE_API_BASE;
 
-export default function AdminPage() {
-  const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(null);
-  const [claims, setClaims] = useState(null);
+export default function AdminPage({ token, isAdmin }) {
   const [sneakers, setSneakers] = useState([]);
   const [status, setStatus] = useState('');
 
+  // Public GET (no auth required)
   useEffect(() => {
-    let mounted = true;
-
-    (async () => {
-      try {
-        // Get tokens from Amplify v6
-        const { tokens } = await fetchAuthSession();
-        const accessToken = tokens?.accessToken?.toString(); 
-        const idToken = tokens?.idToken?.toString();         // JWT string
-        if (!idToken) throw new Error('No session');
-        const decoded = JSON.parse(atob(idToken.split('.')[1])); // claims
-        if (!mounted) return;
-        setToken(idToken);
-        setClaims(decoded);
-        setLoading(false);
-        window.__ID_TOKEN__ = idToken;              // so you can copy it
-        console.log('ID_TOKEN for API GW test:', idToken);  // dev-only
-      } catch (e) {
-        // Not signed in → go to Hosted UI (includes "Sign up")
-        setLoading(false);
-        await signInWithRedirect({ provider: 'COGNITO' });
-      }
-    })();
-
+    let alive = true;
     (async () => {
       try {
         const res = await fetch(`${API_BASE}/shoes`);
-        if (!res.ok) throw new Error('Failed to fetch shoes');
-        const data = await res.json();
-        if (mounted) setSneakers(data);
+        if (res.ok) {
+          const data = await res.json();
+          if (alive) setSneakers(data);
+        }
       } catch (e) {
-        console.error(e);
+        console.error('GET /shoes failed', e);
       }
     })();
-
-    return () => { mounted = false; };
+    return () => { alive = false; };
   }, []);
 
-  if (loading) return <div>Loading session…</div>;
-
-  const groups = claims?.['cognito:groups'] || [];
-  const isAdmin = Array.isArray(groups) ? groups.includes('admin') : String(groups).includes('admin');
-
+  // Guard UI
+  if (!token) {
+    return (
+      <div style={{ display: 'grid', gap: 12 }}>
+        <h1>Admin Panel</h1>
+        <p>You must sign in to manage sneakers.</p>
+      </div>
+    );
+  }
   if (!isAdmin) {
     return (
-      <div>
+      <div style={{ display: 'grid', gap: 12 }}>
+        <h1>Admin Panel</h1>
         <p>You’re signed in but not an admin.</p>
         <button onClick={() => signOut({ global: true }).then(() => window.location.assign('/'))}>
           Sign out
@@ -73,8 +54,9 @@ export default function AdminPage() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(patch),
       });
-      if (!res.ok) throw new Error(`Update failed: ${res.status}`);
+      if (!res.ok) throw new Error(`Update failed: ${res.status} ${await res.text()}`);
       setStatus('✅ Updated');
+      // optionally refresh list here
     } catch (e) {
       setStatus(`❌ ${e.message}`);
     }
@@ -82,14 +64,12 @@ export default function AdminPage() {
 
   async function deleteShoe(id) {
     setStatus('');
-    try { 
-      console.log("access token: ", token)
-      const res = await fetch(`${API_BASE}/shoes/${id}`, 
-        {
+    try {
+      const res = await fetch(`${API_BASE}/shoes/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error(`Delete failed: ${res.status}`);
+      if (!res.ok) throw new Error(`Delete failed: ${res.status} ${await res.text()}`);
       setSneakers(prev => prev.filter(s => String(s.id) !== String(id)));
       setStatus('🗑️ Deleted');
     } catch (e) {
@@ -103,6 +83,7 @@ export default function AdminPage() {
 
       <section>
         <h2>Add a Sneaker</h2>
+        {/* POST uses token */}
         <SneakerForm setSneakers={setSneakers} token={token} />
       </section>
 
@@ -115,7 +96,9 @@ export default function AdminPage() {
               {s.id && (
                 <>
                   {' '}|{' '}
-                  <button onClick={() => updateShoe(s.id, { price: Number(s.price) + 1 })}>+$1</button>{' '}
+                  <button onClick={() => updateShoe(s.id, { price: Number(s.price) + 1 })}>
+                    +$1
+                  </button>{' '}
                   <button onClick={() => deleteShoe(s.id)}>Delete</button>
                 </>
               )}
@@ -132,5 +115,6 @@ export default function AdminPage() {
     </div>
   );
 }
+
 
 

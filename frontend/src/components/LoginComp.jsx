@@ -34,7 +34,7 @@ export default function LoginComp() {
   }
 
   return (
-    <button onClick={() => signInWithRedirect({ provider: 'COGNITO' })}>
+    <button onClick={() => signInWithRedirect()}>
       Sign in / Sign up
     </button>
   );

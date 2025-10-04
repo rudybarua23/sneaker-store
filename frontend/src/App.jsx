@@ -1,38 +1,23 @@
 // App.jsx
 import { useEffect, useState } from 'react';
 import { fetchAuthSession } from 'aws-amplify/auth';
+import { Routes, Route, Link } from 'react-router-dom';
 import SneakerList from './components/sneakerList';
 import SneakerForm from './components/sneakerForm';
 import LoginComp from './components/LoginComp';
-import Cart from './components/Cart';                 
-import './components/Cart.css';                      
+import Cart from './components/Cart';
+import './components/Cart.css';
+import AdminPage from './pages/AdminPage';
 
 export default function App() {
   const [sneakers, setSneakers] = useState([]);
-  const [token, setToken] = useState(null);          // ID token for API Gateway authorizer
+  const [token, setToken] = useState(null);   // ID token for API Gateway authorizer
   const [isAdmin, setIsAdmin] = useState(false);
 
   const [cart, setCart] = useState([
-    {
-      id: 1,
-      name: 'Air Force Juans',
-      price: 499,
-      image:
-        'https://134087839.cdn6.editmysite.com/uploads/1/3/4/0/134087839/W6FSZXNQ42EQV7K6AWN2EZLY.jpeg',
-    },
-    {
-      id: 2,
-      name: 'Simpson`s Xtreme',
-      price: 699,
-      image: 'https://m.media-amazon.com/images/I/81oC+oPXEdL._UY300_.jpg',
-    },
-    {
-      id: 3,
-      name: 'Nike SB Dunk Low Ms. Pacman Mens',
-      price: 799,
-      image:
-        'https://image.goat.com/transform/v1/attachments/product_template_additional_pictures/images/000/846/991/original/2.jpg?action=crop&width=750',
-    },
+    { id: 1, name: 'Air Force Juans', price: 499, image: 'https://134087839.cdn6.editmysite.com/uploads/1/3/4/0/134087839/W6FSZXNQ42EQV7K6AWN2EZLY.jpeg' },
+    { id: 2, name: 'Simpson`s Xtreme', price: 699, image: 'https://m.media-amazon.com/images/I/81oC+oPXEdL._UY300_.jpg' },
+    { id: 3, name: 'Nike SB Dunk Low Ms. Pacman Mens', price: 799, image: 'https://image.goat.com/transform/v1/attachments/product_template_additional_pictures/images/000/846/991/original/2.jpg?action=crop&width=750' },
   ]);
 
   useEffect(() => {
@@ -61,9 +46,7 @@ export default function App() {
         const payload = id.split('.')[1] || '';
         const claims = JSON.parse(atob(payload));
         const groups = claims?.['cognito:groups'] || [];
-        const admin = Array.isArray(groups)
-          ? groups.includes('admin')
-          : String(groups).includes('admin');
+        const admin = Array.isArray(groups) ? groups.includes('admin') : String(groups).includes('admin');
         setIsAdmin(admin);
 
         if (import.meta.env.DEV) {
@@ -71,18 +54,16 @@ export default function App() {
           console.log('ID token present, len =', id.length);
         }
       } catch {
-        // not signed in yet; LoginComp will trigger Hosted UI
+        // not signed in yet; LoginComp can trigger Hosted UI
       }
     })();
 
-    return () => {
-      alive = false;
-    };
+    return () => { alive = false; };
   }, []);
 
   return (
     <div>
-      {/* Friend's navbar with Cart + your Login */}
+      {/* Top navbar with Login + Cart */}
       <div
         id="navBar"
         style={{
@@ -107,23 +88,42 @@ export default function App() {
       {/* offset page content if navbar is fixed */}
       <div style={{ height: 64 }} />
 
-      <h1>Sneaker Catalog</h1>
+      {/* simple nav to reach Admin */}
+      <nav style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+        <Link to="/">Catalog</Link>
+        <Link to="/admin">Admin</Link>
+      </nav>
 
-      <SneakerList
-        sneakers={sneakers}
-        isAdmin={isAdmin}
-        setSneakers={setSneakers}
-        token={token} // DELETE uses this
-      />
-
-      {isAdmin ? (
-        <>
-          <h2>Add New Sneaker</h2>
-          <SneakerForm setSneakers={setSneakers} token={token} /> {/* POST uses this */}
-        </>
-      ) : (
-        <p style={{ opacity: 0.7 }}>Sign in as an admin to add or delete sneakers.</p>
-      )}
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              <h1>Sneaker Catalog</h1>
+              <SneakerList
+                sneakers={sneakers}
+                isAdmin={isAdmin}
+                // no onUpdate/onDelete ⇒ edit/delete hidden in catalog view
+              />
+              {isAdmin ? (
+                <>
+                  <h2>Add New Sneaker</h2>
+                  <SneakerForm setSneakers={setSneakers} token={token} />
+                </>
+              ) : (
+                <p style={{ opacity: 0.7 }}>
+                  Sign in as an admin to add or delete sneakers.
+                </p>
+              )}
+            </>
+          }
+        />
+        <Route
+          path="/admin"
+          element={<AdminPage token={token} isAdmin={isAdmin} />}
+        />
+      </Routes>
     </div>
   );
 }
+

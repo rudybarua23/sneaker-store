@@ -10,16 +10,14 @@ function Cart({cart, setCart}) {
         </button>
         {showCart && (
                 <div className={`cart ${cart.length > 0 ? 'active' : ''}`}>
-                    <h2>My Cart</h2>
+                    <h1>Items:</h1>
                     {cart.length === 0 ? (
-                        <p className="empty-cart">Geek, your cart is empty.</p>
+                        <p className="empty-cart">Cart is empty.</p>
                     ) : (
                         <div id='cart-dropdown'>
-                            <h1>Cart:</h1>
                                 <ul>
                                     {cart.map((item) => (
                                         <li key={item.id} className="cart-item">
-                                            {console.log(item)}
                                             <div className="item-info">
                                                 <div className="item-image">
                                                     <img src={item.image} 
@@ -31,7 +29,7 @@ function Cart({cart, setCart}) {
                                                 </div>
                                             </div>
                                                                     {/* Example remove button */}
-                                            <button className='remove-item' onClick={() => setCart((prev) => prev.filter((i) => i.id !== item.id))}>
+                                            <button className='remove-item' onClick={() => setCart((prev) => prev.filter((i) => i.id !== item.id))} style={{color: "#ff0000"}}>
                                                 X
                                             </button>
                                         </li>

@@ -6,6 +6,7 @@ import SneakerList from './components/sneakerList';
 import SneakerForm from './components/sneakerForm';
 import LoginComp from './components/LoginComp';
 import Cart from './components/Cart';
+import './App.css'
 import './components/Cart.css';
 import AdminPage from './pages/AdminPage';
 
@@ -64,35 +65,20 @@ export default function App() {
   return (
     <div>
       {/* Top navbar with Login + Cart */}
-      <div
-        id="navBar"
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          width: '98vw',
-          position: 'fixed',
-          top: 0,
-          padding: '1vw',
-          paddingTop: '1vh',
-          paddingBottom: '1vh',
-          backgroundColor: 'rgba(106, 148, 165, 1)',
-          zIndex: 10,
-        }}
-      >
+      <div id="navBar">
         <LoginComp />
+        {/* simple nav to reach Admin */}
+        <nav>
+          <Link to="/">Catalog</Link>
+          <Link to="/admin">Admin</Link>
+        </nav>
         <Cart cart={cart} setCart={setCart} />
       </div>
 
       {/* offset page content if navbar is fixed */}
       <div style={{ height: 64 }} />
 
-      {/* simple nav to reach Admin */}
-      <nav style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
-        <Link to="/">Catalog</Link>
-        <Link to="/admin">Admin</Link>
-      </nav>
+
 
       <Routes>
         <Route

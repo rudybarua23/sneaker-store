@@ -21,10 +21,10 @@ export default function SneakerForm({ setSneakers }) {
         brand: form.brand,
         price: Number(form.price),
         image: form.image,
-        size: Number(form.size), // keep if your POST /shoes handler expects this legacy field
+        size: Number(form.size), // keep if your POST expects this
       };
 
-      // add inventory row if size provided
+      // include an initial inventory row if size provided
       const sizeNum = Number(form.size);
       const qtyNum = form.quantity === '' ? 1 : Number(form.quantity);
       if (Number.isFinite(sizeNum)) {
@@ -36,11 +36,18 @@ export default function SneakerForm({ setSneakers }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-
       if (!res.ok) throw new Error(`Add failed: ${res.status} ${await res.text()}`);
-      const newSneaker = await res.json();
 
-      setSneakers((prev) => [...prev, newSneaker]);
+      // parse ONCE
+      const returned = await res.json();
+
+      // ensure the new item in state has inventory for the Edit form
+      const created = {
+        ...returned,
+        inventory: payload.inventory ?? returned.inventory ?? [],
+      };
+
+      setSneakers((prev) => [...prev, created]);
       setForm({ name: '', brand: '', price: '', size: '', quantity: '', image: '' });
     } catch (err) {
       console.error(err);
@@ -56,12 +63,13 @@ export default function SneakerForm({ setSneakers }) {
       <input name="brand" placeholder="Brand" value={form.brand} onChange={handleChange} required />
       <input name="price" type="number" placeholder="Price" value={form.price} onChange={handleChange} required />
       <input name="size" type="number" placeholder="Size" value={form.size} onChange={handleChange} required />
-      <input name="quantity" type="number" min="0" placeholder="Quantity (default 1)" value={form.quantity} onChange={handleChange}/>
+      <input name="quantity" type="number" min="0" placeholder="Quantity (default 1)" value={form.quantity} onChange={handleChange} />
       <input name="image" placeholder="Image URL" value={form.image} onChange={handleChange} required />
       <button type="submit" disabled={submitting}>{submitting ? 'Adding…' : 'Add Sneaker'}</button>
       {error && <div style={{ color: 'crimson' }}>{error}</div>}
     </form>
   );
 }
+
 
 

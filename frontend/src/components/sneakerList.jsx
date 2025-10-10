@@ -4,7 +4,7 @@ import { useState } from 'react';
 function SneakerList({ sneakers, isAdmin, onUpdate, onDelete }) {
   const [editingId, setEditingId] = useState(null);
   const [priceDraft, setPriceDraft] = useState('');
-  const [invRows, setInvRows] = useState([]); // [{ size:'', qty:'' }, ...]
+  const [invRows, setInvRows] = useState([]); // [{ size:'', qty:'', _delete:false }, ...]
 
   const canEdit = Boolean(isAdmin && typeof onUpdate === 'function');
   const canDelete = Boolean(isAdmin && typeof onDelete === 'function');
@@ -12,25 +12,19 @@ function SneakerList({ sneakers, isAdmin, onUpdate, onDelete }) {
   const startEdit = (s) => {
     setEditingId(s.id);
     setPriceDraft(s.price ?? '');
-
-    // If your GET /shoes returns inventory, prefill it; otherwise start empty
-    const prefilled =
-      Array.isArray(s.inventory)
-        ? s.inventory.map(it => ({ size: String(it.size ?? ''), qty: String(it.quantity ?? '') }))
-        : [{ size: '', qty: '' }];
+    const prefilled = Array.isArray(s.inventory)
+      ? s.inventory.map(it => ({ size: String(it.size ?? ''), qty: String(it.quantity ?? ''), _delete: false }))
+      : [{ size: '', qty: '', _delete: false }];
     setInvRows(prefilled);
   };
 
-  const cancelEdit = () => {
-    setEditingId(null);
-    setPriceDraft('');
-    setInvRows([]);
-  };
-
-  const addRow = () => setInvRows(prev => [...prev, { size: '', qty: '' }]);
+  const cancelEdit = () => { setEditingId(null); setPriceDraft(''); setInvRows([]); };
+  const addRow = () => setInvRows(prev => [...prev, { size: '', qty: '', _delete: false }]);
   const removeRow = (idx) => setInvRows(prev => prev.filter((_, i) => i !== idx));
   const editRow = (idx, field, value) =>
     setInvRows(prev => prev.map((r, i) => (i === idx ? { ...r, [field]: value } : r)));
+  const toggleDelete = (idx) =>
+    setInvRows(prev => prev.map((r, i) => (i === idx ? { ...r, _delete: !r._delete } : r)));
 
   const saveEdit = async (id) => {
     if (!canEdit) return;
@@ -42,19 +36,24 @@ function SneakerList({ sneakers, isAdmin, onUpdate, onDelete }) {
       patch.price = Number(priceDraft);
     }
 
-    // Collect multiple sizes if provided
+    // Build inventory ops
     const inventory = invRows
-      .map(r => ({
-        size: Number(r.size),
-        quantity: Number(r.qty),
-      }))
-      .filter(r => !Number.isNaN(r.size) && !Number.isNaN(r.quantity));
+      .map(r => {
+        const size = Number(r.size);
+        const qty  = Number(r.qty);
+        if (!Number.isFinite(size)) return null;
 
-    if (inventory.length) {
-      patch.inventory = inventory;
-      // >1 rows ⇒ AdminPage.onUpdate will do PUT (full replace)
-      // 1 row  ⇒ AdminPage.onUpdate will do PATCH (single-size update)
-    }
+        // If marked for delete, send the delete marker
+        if (r._delete) return { size, delete: true };
+
+        // Otherwise send an upsert if qty is a valid number
+        if (Number.isFinite(qty)) return { size, quantity: qty };
+
+        return null;
+      })
+      .filter(Boolean);
+
+    if (inventory.length) patch.inventory = inventory;
 
     if (!Object.keys(patch).length) {
       alert('Nothing to update.');
@@ -84,11 +83,7 @@ function SneakerList({ sneakers, isAdmin, onUpdate, onDelete }) {
             <div style={{ display: 'grid', gap: 8, marginTop: 8, background: '#fafafa', padding: 8 }}>
               <label>
                 Price:&nbsp;
-                <input
-                  type="number"
-                  value={priceDraft}
-                  onChange={(e) => setPriceDraft(e.target.value)}
-                />
+                <input type="number" value={priceDraft} onChange={(e) => setPriceDraft(e.target.value)} />
               </label>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -104,6 +99,7 @@ function SneakerList({ sneakers, isAdmin, onUpdate, onDelete }) {
                     value={row.size}
                     onChange={(e) => editRow(idx, 'size', e.target.value)}
                     style={{ width: 90 }}
+                    disabled={row._delete}
                   />
                   <input
                     type="number"
@@ -111,8 +107,12 @@ function SneakerList({ sneakers, isAdmin, onUpdate, onDelete }) {
                     value={row.qty}
                     onChange={(e) => editRow(idx, 'qty', e.target.value)}
                     style={{ width: 90 }}
+                    disabled={row._delete}
                   />
-                  <button type="button" onClick={() => removeRow(idx)}>Remove</button>
+                  <button type="button" onClick={() => toggleDelete(idx)} style={{ color: row._delete ? 'red' : 'inherit' }}>
+                    {row._delete ? 'Undo delete' : 'Delete size'}
+                  </button>
+                  <button type="button" onClick={() => removeRow(idx)}>Remove row</button>
                 </div>
               ))}
 
@@ -129,6 +129,7 @@ function SneakerList({ sneakers, isAdmin, onUpdate, onDelete }) {
 }
 
 export default SneakerList;
+
 
 
 

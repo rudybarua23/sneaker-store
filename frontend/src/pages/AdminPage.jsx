@@ -1,11 +1,12 @@
 // src/pages/AdminPage.jsx
 import { useEffect, useState } from 'react';
-import { signOut } from 'aws-amplify/auth';
 import SneakerForm from '../components/sneakerForm';
 import SneakerList from '../components/sneakerList';
+import { authFetch } from '../lib/authFetch';
+
 const API_BASE = import.meta.env.VITE_API_BASE;
 
-export default function AdminPage({ token, isAdmin }) {
+export default function AdminPage({ isAdmin }) {
   const [sneakers, setSneakers] = useState([]);
   const [status, setStatus] = useState('');
 
@@ -13,11 +14,10 @@ export default function AdminPage({ token, isAdmin }) {
     let alive = true;
     (async () => {
       try {
-        const res = await fetch(`${API_BASE}/shoes`);
-        if (res.ok) {
-          const data = await res.json();
-          if (alive) setSneakers(data);
-        }
+        const res = await fetch(`${API_BASE}/shoes`); // public endpoint
+        if (!res.ok) throw new Error(`GET /shoes ${res.status}`);
+        const data = await res.json();
+        if (alive) setSneakers(data);
       } catch (e) {
         console.error('GET /shoes failed', e);
       }
@@ -25,42 +25,36 @@ export default function AdminPage({ token, isAdmin }) {
     return () => { alive = false; };
   }, []);
 
-  if (!token) return <div><h1>Admin Panel</h1><p>You must sign in to manage sneakers.</p></div>;
   if (!isAdmin) {
     return (
       <div>
         <h1>Admin Panel</h1>
-        <p>You’re signed in but not an admin.</p>
-        <button onClick={() => signOut({ global: true }).then(() => window.location.assign('/'))}>
-          Sign out
-        </button>
+        <p>You must sign in as an admin to manage sneakers.</p>
       </div>
     );
   }
 
+  async function reload() {
+    try {
+      const res = await fetch(`${API_BASE}/shoes`);
+      if (res.ok) setSneakers(await res.json());
+    } catch {}
+  }
+
   async function onUpdate(id, patch) {
     setStatus('');
-
-    // helper to refresh after updates (optional)
-    async function reload() {
-      try {
-        const res = await fetch(`${API_BASE}/shoes`);
-        if (res.ok) setSneakers(await res.json());
-      } catch {}
-    }
-
     try {
       const hasInv = Array.isArray(patch.inventory);
       const hasShoeFields = ['name', 'brand', 'price', 'image'].some(k => patch[k] !== undefined);
 
-      // 1) If there are shoe fields, send them via PUT (but do NOT include inventory here)
+      // 1) Update shoe fields via PUT (no inventory in this call)
       if (hasShoeFields) {
         const body = { ...patch };
-        delete body.inventory; // avoid accidental full replace
+        delete body.inventory;
         if (Object.keys(body).length) {
-          const res = await fetch(`${API_BASE}/shoes/${id}`, {
+          const res = await authFetch(`${API_BASE}/shoes/${id}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body),
           });
           if (!res.ok) throw new Error(`PUT failed: ${res.status} ${await res.text()}`);
@@ -69,38 +63,52 @@ export default function AdminPage({ token, isAdmin }) {
         }
       }
 
-      // 2) If inventory changes were provided, decide PATCH (single size) vs PUT (full replace)
+      // 2) Inventory edits
       if (hasInv) {
-        if (patch.inventory.length === 1) {
-          // PATCH a single size’s quantity (surgical update, does not touch other sizes)
-          const { size, quantity, delta } = patch.inventory[0] || {};
-          const payload =
-            quantity !== undefined
-              ? { size: Number(size), quantity: Number(quantity) }
-              : { size: Number(size), delta: Number(delta) };
+        // treat { size, delete:true } OR { size, quantity:null } as deletes
+        const hasDelete = patch.inventory.some(
+          it => it && (it.delete === true || it.quantity == null)
+        );
 
-          const res = await fetch(`${API_BASE}/shoes/${id}/inventory`, {
+        // normalize sizes/quantities to numbers (optional but nice)
+        const invNormalized = patch.inventory.map(it => ({
+          ...(it || {}),
+          size: Number(it?.size),
+          quantity: it?.quantity != null ? Number(it.quantity) : it?.quantity, // keep null for delete
+        }));
+
+        if (!hasDelete &&
+            invNormalized.length === 1 &&
+            invNormalized[0].quantity !== undefined &&
+            invNormalized[0].quantity !== null &&
+            !Number.isNaN(invNormalized[0].size) &&
+            !Number.isNaN(invNormalized[0].quantity)) {
+          // Single size, normal qty update → PATCH
+          const { size, quantity, delta } = invNormalized[0];
+          const payload = (quantity !== undefined)
+            ? { size, quantity }
+            : { size, delta: Number(delta) };
+
+          const res = await authFetch(`${API_BASE}/shoes/${id}/inventory`, {
             method: 'PATCH',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
           });
           if (!res.ok) throw new Error(`PATCH inventory failed: ${res.status} ${await res.text()}`);
-
-          // You can reload if you display inventory in the UI
-          // await reload();
         } else {
-          // Multiple sizes → full replace via PUT inventory
-          const res = await fetch(`${API_BASE}/shoes/${id}`, {
+          // Any delete present OR multiple rows → PUT merge (upsert + per-size delete)
+          const res = await authFetch(`${API_BASE}/shoes/${id}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ inventory: patch.inventory }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ inventory: invNormalized }),
           });
           if (!res.ok) throw new Error(`PUT inventory failed: ${res.status} ${await res.text()}`);
-          // await reload();
         }
       }
 
       setStatus('✅ Updated');
+      // optionally refresh the list if your UI shows inventory details
+      await reload();
     } catch (e) {
       console.error(e);
       setStatus(`❌ ${e.message}`);
@@ -110,10 +118,7 @@ export default function AdminPage({ token, isAdmin }) {
   async function onDelete(id) {
     setStatus('');
     try {
-      const res = await fetch(`${API_BASE}/shoes/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await authFetch(`${API_BASE}/shoes/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error(`Delete failed: ${res.status} ${await res.text()}`);
       setSneakers(prev => prev.filter(s => String(s.id) !== String(id)));
       setStatus('🗑️ Deleted');
@@ -128,7 +133,8 @@ export default function AdminPage({ token, isAdmin }) {
 
       <section>
         <h2>Add a Sneaker</h2>
-        <SneakerForm setSneakers={setSneakers} token={token} />
+        {/* remove token prop elsewhere too */}
+        <SneakerForm setSneakers={setSneakers} />
       </section>
 
       <section>
@@ -137,20 +143,16 @@ export default function AdminPage({ token, isAdmin }) {
           sneakers={sneakers}
           isAdmin={isAdmin}
           setSneakers={setSneakers}
-          token={token}
           onUpdate={onUpdate}
-          onDelete={onDelete} 
+          onDelete={onDelete}
         />
       </section>
 
       {status && <div>{status}</div>}
-
-      <button onClick={() => signOut({ global: true }).then(() => window.location.assign('/'))}>
-        Sign out
-      </button>
     </div>
   );
 }
+
 
 
 

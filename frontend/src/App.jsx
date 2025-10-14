@@ -1,9 +1,8 @@
 // App.jsx
 import { useEffect, useState } from 'react';
 import { fetchAuthSession } from 'aws-amplify/auth';
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route, Link, Navigate } from 'react-router-dom';
 import SneakerList from './components/sneakerList';
-import SneakerForm from './components/sneakerForm';
 import LoginComp from './components/LoginComp';
 import Cart from './components/Cart';
 import './App.css'
@@ -12,8 +11,8 @@ import AdminPage from './pages/AdminPage';
 
 export default function App() {
   const [sneakers, setSneakers] = useState([]);
-  const [token, setToken] = useState(null);   // ID token for API Gateway authorizer
   const [isAdmin, setIsAdmin] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
 
   const [cart, setCart] = useState([
     { id: 1, name: 'Air Force Juans', price: 499, image: 'https://134087839.cdn6.editmysite.com/uploads/1/3/4/0/134087839/W6FSZXNQ42EQV7K6AWN2EZLY.jpeg' },
@@ -24,7 +23,7 @@ export default function App() {
   useEffect(() => {
     let alive = true;
 
-    // Public list (no auth)
+    // Public list
     (async () => {
       try {
         const res = await fetch(`${import.meta.env.VITE_API_BASE}/shoes`);
@@ -36,26 +35,19 @@ export default function App() {
       }
     })();
 
-    // Read Cognito session → ID token → admin groups
+    // Auth flags (no token in state)
     (async () => {
       try {
-        const { tokens } = await fetchAuthSession();
-        const id = tokens?.idToken?.toString();
-        if (!id || !alive) return; // not signed in yet
-        setToken(id);
-
-        const payload = id.split('.')[1] || '';
-        const claims = JSON.parse(atob(payload));
-        const groups = claims?.['cognito:groups'] || [];
-        const admin = Array.isArray(groups) ? groups.includes('admin') : String(groups).includes('admin');
-        setIsAdmin(admin);
-
-        if (import.meta.env.DEV) {
-          window.__ID_TOKEN__ = id; // dev helper
-          console.log('ID token present, len =', id.length);
-        }
+        const s = await fetchAuthSession(); // refreshes if needed
+        const groups = s.tokens?.idToken?.payload?.['cognito:groups'] || [];
+        const admin = Array.isArray(groups)
+          ? groups.includes('admin')
+          : String(groups || '').split(',').includes('admin');
+        if (alive) setIsAdmin(admin);
       } catch {
-        // not signed in yet; LoginComp can trigger Hosted UI
+        if (alive) setIsAdmin(false);
+      } finally {
+        if (alive) setAuthReady(true);
       }
     })();
 
@@ -70,15 +62,12 @@ export default function App() {
         {/* simple nav to reach Admin */}
         <nav>
           <Link to="/">Catalog</Link>
-          <Link to="/admin">Admin</Link>
+          {isAdmin && <Link to="/admin">Admin</Link>}
         </nav>
         <Cart cart={cart} setCart={setCart} />
       </div>
 
-      {/* offset page content if navbar is fixed */}
       <div style={{ height: 64 }} />
-
-
 
       <Routes>
         <Route
@@ -86,32 +75,22 @@ export default function App() {
           element={
             <div className='main_cont'>
               <h1>Sneaker Catalog</h1>
-              <SneakerList
-                sneakers={sneakers}
-                isAdmin={isAdmin}
-                cart={cart}
-                setCart={setCart}
-                // no onUpdate/onDelete ⇒ edit/delete hidden in catalog view
-              />
-              {isAdmin ? (
-                <>
-                  <h2>Add New Sneaker</h2>
-                  <SneakerForm setSneakers={setSneakers} token={token} />
-                </>
-              ) : (
-                <p style={{ opacity: 0.7 }}>
-                  Sign in as an admin to add or delete sneakers.
-                </p>
-              )}
+              <SneakerList sneakers={sneakers} isAdmin={isAdmin} />
+              {isAdmin && <p style={{opacity:.7}}>Go to the Admin page to add/edit shoes.</p>}
             </div>
           }
         />
         <Route
           path="/admin"
-          element={<AdminPage token={token} isAdmin={isAdmin} />}
+          element={
+            !authReady ? <div>Loading…</div>
+            : isAdmin ? <AdminPage isAdmin={isAdmin} />
+            : <Navigate to="/" replace />
+          }
         />
       </Routes>
     </div>
   );
 }
+
 

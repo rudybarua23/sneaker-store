@@ -1,10 +1,29 @@
-#root {
+body {
+  margin: 0;
   width: 100vw;
   height: 100vh;
-  max-width: 1280px;
+  max-width: 100vw;
+  max-height: 100vh;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
   margin: 0;
   padding: 0;
   text-align: center;
+  background-color: #DEDED1;
+  overflow-y: scroll;
+  scrollbar-color: #B6AE9F #DEDED1;
+}
+
+div.main_cont{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 div#navBar{
@@ -18,7 +37,7 @@ div#navBar{
   padding: 1vw;
   padding-top: 1vh;
   padding-bottom: 1vh;
-  background-color: rgb(133, 153, 161);
+  background-color: #B6AE9F;
   z-index: 10;
 }
 div#navBar nav {
@@ -35,4 +54,11 @@ nav a {
   color: #1a1a1a;
   font-size:x-large;
 
+}
+
+h1 {
+  color: #1a1a1a;
+}
+p {
+  color: #1a1a1a;
 }

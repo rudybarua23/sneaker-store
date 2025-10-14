@@ -1,0 +1,42 @@
+div.sneakers_container {
+    width: 100%;
+    max-width: 1280px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+
+div.sneaker_div {
+    border: '1px solid #ddd';
+    padding: 1% 5% 1% 5%;
+    margin-bottom: 8;
+    min-width: 320px;
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    background-color: #B6AE9F;
+    margin-bottom: 12px;
+}
+h3 {
+    color: #1a1a1a;
+}
+div.sneaker_div:nth-child(odd) {
+    background-color: rgba(182, 174, 159, 0.5);
+}
+
+
+button.add-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+    min-width: 30%;
+    height: auto;
+    height: 36px;
+    background-color: rgba(26, 26, 26, 0.65);
+}

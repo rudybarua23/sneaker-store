@@ -84,11 +84,13 @@ export default function App() {
         <Route
           path="/"
           element={
-            <>
+            <div className='main_cont'>
               <h1>Sneaker Catalog</h1>
               <SneakerList
                 sneakers={sneakers}
                 isAdmin={isAdmin}
+                cart={cart}
+                setCart={setCart}
                 // no onUpdate/onDelete ⇒ edit/delete hidden in catalog view
               />
               {isAdmin ? (
@@ -101,7 +103,7 @@ export default function App() {
                   Sign in as an admin to add or delete sneakers.
                 </p>
               )}
-            </>
+            </div>
           }
         />
         <Route

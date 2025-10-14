@@ -17,14 +17,16 @@ div.cart{
     position: absolute;
     top: 7vh;
     right: 1vw;
+
 }
 
 .empty-cart {
     
 }
 
-.cart-dropdown {
-
+#cart-dropdown {
+    max-height: 70vh;
+    overflow-y: scroll;
 }
 
 .cart-item {
@@ -62,5 +64,15 @@ div.cart{
 button.remove-item{
     width: 10%;
     height: 50%;
+    background-color: rgba(255, 255, 255, 0);
+}
 
+.cart h1 {
+    color: #DEDED1;
+}
+.cart h3 {
+    color: #DEDED1;
+}
+.cart p {
+    color: #B6AE9F;
 }

@@ -1,7 +1,8 @@
 // src/components/sneakerList.jsx
 import { useState } from 'react';
+import './sneakerList.css';
 
-function SneakerList({ sneakers, isAdmin, onUpdate, onDelete }) {
+function SneakerList({ sneakers, isAdmin, onUpdate, onDelete, cart, setCart }) {
   const [editingId, setEditingId] = useState(null);
   const [priceDraft, setPriceDraft] = useState('');
   const [invRows, setInvRows] = useState([]); // [{ size:'', qty:'' }, ...]
@@ -65,14 +66,17 @@ function SneakerList({ sneakers, isAdmin, onUpdate, onDelete }) {
     cancelEdit();
   };
 
+
   return (
-    <div>
+    <div className='sneakers_container'>
       {sneakers.map((s) => (
-        <div key={s.id} style={{ border: '1px solid #ddd', padding: 12, marginBottom: 8 }}>
+        <div key={s.id} className='sneaker_div'>
           <h3>{s.name}</h3>
           <p>{s.brand} — ${s.price}</p>
-          {s.image && <img src={s.image} alt={s.name} width="150" />}
-
+          {s.image && <img src={s.image} alt={s.name} width="150px" />}
+          <button className='add-item' onClick={() => setCart(prevCart => [...prevCart, s])} >
+              Add to Cart<p style={{color: "#00ff00ff"}}>+</p>
+          </button>
           {canEdit && editingId !== s.id && (
             <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
               <button onClick={() => startEdit(s)}>Edit</button>

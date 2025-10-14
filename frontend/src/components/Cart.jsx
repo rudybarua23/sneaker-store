@@ -1,4 +1,3 @@
-// src/components/LoginComp.jsx
 import { useState } from 'react';
 import './Cart.css'
 function Cart({cart, setCart}) {
@@ -17,18 +16,19 @@ function Cart({cart, setCart}) {
                         <div id='cart-dropdown'>
                                 <ul>
                                     {cart.map((item) => (
+                                        
                                         <li key={item.id} className="cart-item">
+                                            {console.log(cart)}   
                                             <div className="item-info">
                                                 <div className="item-image">
-                                                    <img src={item.image} 
-                                                        alt={item.name} />
+                                                    {item.image && <img src={item.image} alt={item.name} width="150px" />}
                                                 </div>
                                                 <div className="item-details">
                                                     <h3>{item.name}</h3>
                                                     <p>Price: ${item.price}</p>
                                                 </div>
                                             </div>
-                                                                    {/* Example remove button */}
+                                                                 {/* Example remove button */}
                                             <button className='remove-item' onClick={() => setCart((prev) => prev.filter((i) => i.id !== item.id))} style={{color: "#ff0000"}}>
                                                 X
                                             </button>
@@ -37,6 +37,7 @@ function Cart({cart, setCart}) {
                                 </ul>
                         </div>
                     )}
+                    <h2>Total: ${cart.reduce((total, item) => total + Number(item.price), 0.00)}</h2>
                 </div>
             
         )}

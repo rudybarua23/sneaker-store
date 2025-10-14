@@ -75,7 +75,7 @@ export default function App() {
           element={
             <div className='main_cont'>
               <h1>Sneaker Catalog</h1>
-              <SneakerList sneakers={sneakers} isAdmin={isAdmin} />
+              <SneakerList sneakers={sneakers} isAdmin={isAdmin} cart={cart} setCart={setCart}/>
               {isAdmin && <p style={{opacity:.7}}>Go to the Admin page to add/edit shoes.</p>}
             </div>
           }

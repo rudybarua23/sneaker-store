@@ -8,7 +8,7 @@ ul {
 }
 
 div.cart{
-    background-color: rgb(59, 59, 59);
+    background-color: #3b3b3b;
     z-index: 10;
     padding: 1vw;
     padding-top: 1vh;
@@ -27,6 +27,7 @@ div.cart{
 #cart-dropdown {
     max-height: 70vh;
     overflow-y: scroll;
+    scrollbar-color: #B6AE9F #3b3b3b;
 }
 
 .cart-item {

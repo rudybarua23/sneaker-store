@@ -16,9 +16,7 @@ function Cart({cart, setCart}) {
                         <div id='cart-dropdown'>
                                 <ul>
                                     {cart.map((item) => (
-                                        
                                         <li key={item.id} className="cart-item">
-                                            {console.log(cart)}   
                                             <div className="item-info">
                                                 <div className="item-image">
                                                     {item.image && <img src={item.image} alt={item.name} width="150px" />}

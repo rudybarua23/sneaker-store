@@ -99,7 +99,7 @@ npm run preview   # local static preview
 ---
 
 ## 🔧 Environment Variables (Frontend)
-- `VITE_API_BASE=` https://b5gwibc2nd.execute-api.us-east-1.amazonaws.com/dev 
+`VITE_API_BASE=https://b5gwibc2nd.execute-api.us-east-1.amazonaws.com/dev` 
 
 Amplify config values live in `src/amplify-config.jsx`. For stronger separation, you can externalize these to `import.meta.env.*` variables (e.g., `VITE_COGNITO_DOMAIN`, etc.) and reference them in the file.
 

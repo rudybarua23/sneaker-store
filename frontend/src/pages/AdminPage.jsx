@@ -1,29 +1,14 @@
 // src/pages/AdminPage.jsx
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import SneakerForm from '../components/sneakerForm';
 import SneakerList from '../components/sneakerList';
 import { authFetch } from '../lib/authFetch';
 
 const API_BASE = import.meta.env.VITE_API_BASE;
 
-export default function AdminPage({ isAdmin }) {
-  const [sneakers, setSneakers] = useState([]);
+export default function AdminPage({ isAdmin, sneakers = [], onCreateShoe, onUpdateShoe, onDeleteShoe }) {
+  console.log('AdminPage sneakers:', sneakers);
   const [status, setStatus] = useState('');
-
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      try {
-        const res = await fetch(`${API_BASE}/shoes`); // public endpoint
-        if (!res.ok) throw new Error(`GET /shoes ${res.status}`);
-        const data = await res.json();
-        if (alive) setSneakers(data);
-      } catch (e) {
-        console.error('GET /shoes failed', e);
-      }
-    })();
-    return () => { alive = false; };
-  }, []);
 
   if (!isAdmin) {
     return (
@@ -32,13 +17,6 @@ export default function AdminPage({ isAdmin }) {
         <p>You must sign in as an admin to manage sneakers.</p>
       </div>
     );
-  }
-
-  async function reload() {
-    try {
-      const res = await fetch(`${API_BASE}/shoes`);
-      if (res.ok) setSneakers(await res.json());
-    } catch {}
   }
 
   async function onUpdate(id, patch) {
@@ -59,7 +37,8 @@ export default function AdminPage({ isAdmin }) {
           });
           if (!res.ok) throw new Error(`PUT failed: ${res.status} ${await res.text()}`);
           const updated = await res.json();
-          setSneakers(prev => prev.map(s => (String(s.id) === String(id) ? { ...s, ...updated } : s)));
+          // reflect shoe-field changes in App state
+          onUpdateShoe?.(id, updated);
         }
       }
 
@@ -104,11 +83,24 @@ export default function AdminPage({ isAdmin }) {
           });
           if (!res.ok) throw new Error(`PUT inventory failed: ${res.status} ${await res.text()}`);
         }
+
+        // After inventory mutation, fetch the fresh shoe and push it up to App
+        try {
+          const getRes = await fetch(`${API_BASE}/shoes/${id}`);
+          if (getRes.ok) {
+            const fresh = await getRes.json();
+            onUpdateShoe?.(id, {
+              ...fresh,
+              price: typeof fresh.price === 'number' ? fresh.price : Number(fresh.price ?? 0),
+            });
+          }
+        } catch (e) {
+          console.warn('GET /shoes/:id after inventory update failed', e);
+        }
       }
 
       setStatus('✅ Updated');
-      // optionally refresh the list if your UI shows inventory details
-      await reload();
+      // If you want to reflect inventory in UI, you can optionally refetch in App
     } catch (e) {
       console.error(e);
       setStatus(`❌ ${e.message}`);
@@ -120,7 +112,7 @@ export default function AdminPage({ isAdmin }) {
     try {
       const res = await authFetch(`${API_BASE}/shoes/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error(`Delete failed: ${res.status} ${await res.text()}`);
-      setSneakers(prev => prev.filter(s => String(s.id) !== String(id)));
+      onDeleteShoe?.(id); // reflect in App state
       setStatus('🗑️ Deleted');
     } catch (e) {
       setStatus(`❌ ${e.message}`);
@@ -128,21 +120,20 @@ export default function AdminPage({ isAdmin }) {
   }
 
   return (
-    <div style={{ display: 'grid', gap: 16 }}>
+    <div style={{ display: 'flex',flexDirection: 'column', width: '100%', alignItems: 'stretch'}}>
       <h1>Admin Panel</h1>
 
-      <section>
+      <section style={{ display: 'flex',flexDirection: 'column', width: '100%', alignItems: 'center'}}>
         <h2>Add a Sneaker</h2>
         {/* remove token prop elsewhere too */}
-        <SneakerForm setSneakers={setSneakers} />
+        <SneakerForm onCreate={onCreateShoe} style={{ width: '80%'}}/>
       </section>
 
-      <section>
+      <section style={{ display: 'flex',flexDirection: 'column', width: '100%', alignItems: 'center'}}>
         <h2>Current Sneakers</h2>
         <SneakerList
           sneakers={sneakers}
           isAdmin={isAdmin}
-          setSneakers={setSneakers}
           onUpdate={onUpdate}
           onDelete={onDelete}
         />

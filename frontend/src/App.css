@@ -12,9 +12,9 @@ body {
   margin: 0;
   padding: 0;
   text-align: center;
-  background-color: #DEDED1;
+  background-color: #fff;
   overflow-y: scroll;
-  scrollbar-color: #B6AE9F #DEDED1;
+  scrollbar-color: #d6d6d6;
 }
 
 div.main_cont{
@@ -37,7 +37,7 @@ div#navBar{
   padding: 1vw;
   padding-top: 1vh;
   padding-bottom: 1vh;
-  background-color: #B6AE9F;
+  background-color: #d6d6d6;
   z-index: 10;
 }
 div#navBar nav {
@@ -61,4 +61,41 @@ h1 {
 }
 p {
   color: #1a1a1a;
+}
+
+.footer-links { list-style: none; padding: 0; margin: .5rem 0 0; display: grid; gap: .35rem; }
+.footer-links a { color: #d6d6d6; text-decoration: none; }
+.footer-links a:hover { color: #fff; text-decoration: underline; }
+
+/* Hover effect for the whole card */
+.card {
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(0,0,0,.08);
+}
+/* Slight image lift on hover (optional) */
+.card:hover .product-thumb img {
+  transform: scale(1.03);
+}
+.product-thumb img {
+  transition: transform .2s ease;
+}
+
+/* Button hover color change */
+.btn.add-btn {
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: .6rem .9rem;
+  transition: background-color .18s ease, transform .12s ease;
+}
+.btn.add-btn:hover {
+  background: #ff6b4a;     /* your hover color */
+  transform: translateY(-1px);
+}
+.btn.add-btn:active {
+  transform: translateY(0);
 }

@@ -4,7 +4,7 @@ import { authFetch } from '../lib/authFetch';
 
 const API_BASE = import.meta.env.VITE_API_BASE;
 
-export default function SneakerForm({ setSneakers }) {
+export default function SneakerForm({ onCreate }) {
   const [form, setForm] = useState({ name: '', brand: '', price: '', size: '', quantity: '', image: '' });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -47,7 +47,7 @@ export default function SneakerForm({ setSneakers }) {
         inventory: payload.inventory ?? returned.inventory ?? [],
       };
 
-      setSneakers((prev) => [...prev, created]);
+      onCreate?.(created); // <-- notify App.jsx
       setForm({ name: '', brand: '', price: '', size: '', quantity: '', image: '' });
     } catch (err) {
       console.error(err);
@@ -58,7 +58,7 @@ export default function SneakerForm({ setSneakers }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 8, maxWidth: 360 }}>
+    <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 8, width: '80%', maxWidth: '650px' }}>
       <input name="name" placeholder="Name" value={form.name} onChange={handleChange} required />
       <input name="brand" placeholder="Brand" value={form.brand} onChange={handleChange} required />
       <input name="price" type="number" placeholder="Price" value={form.price} onChange={handleChange} required />

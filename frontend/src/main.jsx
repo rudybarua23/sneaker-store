@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 import App from './App.jsx';
 import './amplify-config';
+import './styles/variables.css'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

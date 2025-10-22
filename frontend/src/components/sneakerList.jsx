@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import './sneakerList.css';
 
-function SneakerList({ sneakers, isAdmin, onUpdate, onDelete, cart, setCart }) {
+function SneakerList({ sneakers, isAdmin, onUpdate, onDelete, onAdd }) {
   const [editingId, setEditingId] = useState(null);
   const [priceDraft, setPriceDraft] = useState('');
   const [invRows, setInvRows] = useState([]); // [{ size:'', qty:'', _delete:false }, ...]
@@ -71,15 +71,12 @@ function SneakerList({ sneakers, isAdmin, onUpdate, onDelete, cart, setCart }) {
       {sneakers.map((s) => (
         <div key={s.id} className='sneaker_div'>
           <h3>{s.name}</h3>
-          <p>{s.brand} — ${s.price}</p>
+          <p>{s.brand} — ${Number(s.price).toFixed(2)}</p>
           {s.image && <img src={s.image} alt={s.name} width="150px" />}
-          <button className='add-item' onClick={() => setCart(prevCart => [...prevCart, s])} >
-              Add to Cart<p style={{color: "#00ff00ff"}}>+</p>
-          </button>
           {canEdit && editingId !== s.id && (
             <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
               <button onClick={() => startEdit(s)}>Edit</button>
-              {canDelete && <button onClick={() => onDelete(s.id)}>Delete</button>}
+              {canDelete && <button onClick={() => onDelete?.(s.id)}>Delete</button>}
             </div>
           )}
 
@@ -113,7 +110,7 @@ function SneakerList({ sneakers, isAdmin, onUpdate, onDelete, cart, setCart }) {
                     style={{ width: 90 }}
                     disabled={row._delete}
                   />
-                  <button type="button" onClick={() => toggleDelete(idx)} style={{ color: row._delete ? 'red' : 'inherit' }}>
+                  <button type="button" onClick={() => toggleDelete(idx)} style={{ color: row._delete ? 'red' : 'white' }}>
                     {row._delete ? 'Undo delete' : 'Delete size'}
                   </button>
                   <button type="button" onClick={() => removeRow(idx)}>Remove row</button>

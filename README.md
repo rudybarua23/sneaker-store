@@ -18,6 +18,16 @@ A modern React single‑page application (SPA) e-commerce website for browsing s
 - Auth-aware API calls with automatic token injection
 - Production-ready build and CloudFront/S3 static hosting
 
+## 🛒 Checkout & Payments (In Progress)
+The site currently supports browsing products, cart, and admin inventory.  
+The **checkout flow** (shipping/billing forms, payment authorization/capture, and
+order confirmation) is not connected to a live payment processor yet.
+
+Planned (frontend):
+- Checkout pages for shipping/billing
+- Payment UI (e.g., Stripe Elements or equivalent hosted fields)
+- Clear success/failure states and order confirmation view
+
 ---
 
 ## 🧱 Tech Stack

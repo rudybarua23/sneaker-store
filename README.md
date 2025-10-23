@@ -4,6 +4,12 @@ A modern React single‑page application (SPA) e-commerce website for browsing s
 
 ---
 
+## Live URLs 
+- Frontend: https://dxfbbjnnl2x5b.cloudfront.net/
+- API (dev): https://b5gwibc2nd.execute-api.us-east-1.amazonaws.com/dev
+
+---
+
 ## ✨ Features
 - React + Vite + React Router for a fast SPA
 - Authentication with **Amazon Cognito Hosted UI** using **AWS Amplify v6**

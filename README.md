@@ -40,18 +40,18 @@ vite.config.js                # base:'/' for SPA hosting
 `src/amplify-config.jsx` configures Amplify v6 with your **Cognito User Pool**, **App Client**, and **Hosted UI** domain, and sets **redirect URIs** for **Dev** (http://localhost:5173/) and **Prod** (https://dxfbbjnnl2x5b.cloudfront.net/).
 
 > **Update these values** to match your environment:
-- `region:` 'us-east-1' 
-- `userPoolId:` 'us-east-1_8bMnXBmfA'
-- `userPoolClientId:` '7oiq66djeossfda2i54g227lhb'
-- `domain:` 'us-east-18bmnxbmfa.auth.us-east-1.amazoncognito.com' (Hosted UI), and
-- `loginWith.oauth.redirectSignIn/redirectSignOut:` (Dev & Prod URLs)
+- `region`  
+- `userPoolId` 
+- `userPoolClientId` 
+- `domain` 
+- `loginWith.oauth.redirectSignIn/redirectSignOut` 
 
 The Navbar includes a `LoginComp` which handles `signInWithRedirect`/`signOut` and reflects login state. Admin privileges are derived from the Cognito ID token’s `cognito:groups` (requires **admin** group membership).
 
 ---
 
 ## 🌐 API Base URL
-Admin and inventory operations call your backend API using:
+Admin and inventory operations call backend API using:
 ```
 VITE_API_BASE=https://b5gwibc2nd.execute-api.us-east-1.amazonaws.com/dev
 ```

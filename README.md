@@ -15,7 +15,8 @@ A modern React single‑page application (SPA) e-commerce website for browsing s
 - React + Vite + React Router for a fast SPA
 - Authentication with **Amazon Cognito Hosted UI** using **AWS Amplify v6**
 - Admin panel to **add/edit/delete** sneakers and update **inventory** (size/quantity)
-- Product filtering (by category and price), cart, and a clean componentized UI      Disclaimer: Category filter is still in progress
+- Product filtering (by category and price), cart, and a clean componentized UI
+- Disclaimer: Category filter is still in progress     
 - Auth-aware API calls with automatic token injection
 - Production-ready build and CloudFront/S3 static hosting
 

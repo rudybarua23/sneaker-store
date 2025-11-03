@@ -5,7 +5,7 @@ A modern React single‑page application (SPA) e-commerce website for browsing s
 ---
 
 ## Live URLs & Demo Video
-- Frontend: https://dxfbbjnnl2x5b.cloudfront.net/
+- Live Site (Cloudfront): https://dxfbbjnnl2x5b.cloudfront.net/
 - API (dev): https://b5gwibc2nd.execute-api.us-east-1.amazonaws.com/dev
 - Demo: https://github.com/rudybarua23/sneaker-store/releases/tag/Demo
 

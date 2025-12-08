@@ -11,7 +11,7 @@ A modern React single‑page application (SPA) e-commerce website for browsing s
 
 ---
 
-## ✨ Features
+## Features
 - React + Vite + React Router for a fast SPA
 - Authentication with **Amazon Cognito Hosted UI** using **AWS Amplify v6**
 - Admin panel to **add/edit/delete** sneakers and update **inventory** (size/quantity)
@@ -20,7 +20,7 @@ A modern React single‑page application (SPA) e-commerce website for browsing s
 - Auth-aware API calls with automatic token injection
 - Production-ready build and CloudFront/S3 static hosting
 
-## 🛒 Checkout & Payments (In Progress)
+## Checkout & Payments (In Progress)
 The site currently supports browsing products, cart, and admin inventory.  
 The **checkout flow** (shipping/billing forms, payment authorization/capture, and
 order confirmation) is not connected to a live payment processor yet.
@@ -32,7 +32,7 @@ Planned (frontend):
 
 ---
 
-## 🧱 Tech Stack
+## Tech Stack
 - **React 18**, **Vite**
 - **react-router-dom**
 - **aws-amplify v6** (Auth only)
@@ -41,7 +41,7 @@ Planned (frontend):
 
 ---
 
-## 📁 Project Structure (high level)
+## Project Structure (high level)
 ```
 src/
   amplify-config.jsx          # Amplify v6 Auth + Hosted UI configuration
@@ -54,7 +54,7 @@ vite.config.js                # base:'/' for SPA hosting
 
 ---
 
-## 🔐 🔧 Authentication/Configuration
+## Authentication/Configuration
 `src/amplify-config.jsx` configures Amplify v6 with your **Cognito User Pool**, **App Client**, and **Hosted UI** domain, and sets **redirect URIs** for **Dev** (http://localhost:5173/) and **Prod** (https://dxfbbjnnl2x5b.cloudfront.net/).
 
 > **Update these values** to match your environment:
@@ -68,7 +68,7 @@ The Navbar includes a `LoginComp` which handles `signInWithRedirect`/`signOut` a
 
 ---
 
-## 🌐 API Base URL
+## API Base URL
 Admin and inventory operations call backend API using:
 ```
 VITE_API_BASE=https://b5gwibc2nd.execute-api.us-east-1.amazonaws.com/dev
@@ -83,7 +83,7 @@ For production, set **`VITE_API_BASE`** at build time or in a `.env.production` 
 
 ---
 
-## 🚀 Local Development
+## Local Development
 **Prereqs**: Node 18+
 
 ```bash
@@ -96,7 +96,7 @@ If you use Cognito Hosted UI locally, ensure your **Hosted UI App Client** allow
 
 ---
 
-## 🏗️ Build & Preview
+## Build & Preview
 ```bash
 npm run build     # outputs to dist/
 npm run preview   # local static preview
@@ -104,7 +104,7 @@ npm run preview   # local static preview
 
 ---
 
-## ☁️ Deploy (S3 + CloudFront)
+## Deploy (S3 + CloudFront)
 1. Upload the `dist/` folder to your S3 static website bucket (or origin bucket behind CloudFront).
 2. **Important (SPA routing)**: configure **S3** and/or **CloudFront** to serve **`index.html` for 404s**, so client‑side routes work.
    - S3 static website hosting: set **Index document** = `index.html` and **Error document** = `index.html`.
@@ -123,7 +123,7 @@ Amplify config values live in `src/amplify-config.jsx`. For stronger separation,
 
 ---
 
-## 🧪 Admin & Inventory
+## Admin & Inventory
 - Admin actions are available when the Cognito ID token has `cognito:groups` including **admin**.
 - **AdminPage** uses:
   - `POST   ${VITE_API_BASE}/shoes` — create
@@ -137,7 +137,7 @@ Amplify config values live in `src/amplify-config.jsx`. For stronger separation,
 
 ---
 
-## 📦 Scripts
+## Scripts
 - `npm run dev` — start Vite dev server
 - `npm run build` — production build
 - `npm run preview` — preview built app
@@ -145,7 +145,7 @@ Amplify config values live in `src/amplify-config.jsx`. For stronger separation,
 
 ---
 
-## ✅ Checklist for Production
+## Checklist for Production
 - [ ] Cognito Hosted UI URLs point to your **CloudFront** domain
 - [ ] `VITE_API_BASE` points to your **API Gateway** URL (right stage)
 - [ ] SPA routing configured (404 → `/index.html`)
